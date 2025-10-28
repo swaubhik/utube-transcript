@@ -1,0 +1,78 @@
+# YouTube Transcript Generator
+
+A Python CLI tool to generate transcripts from YouTube videos using either OpenAI's Whisper API or local Whisper model.
+
+## Features
+
+- Download audio from YouTube videos using yt-dlp
+- Transcribe using OpenAI Whisper API (recommended) or local Whisper model
+- Multiple output formats: TXT, SRT (with timestamps), or JSON
+- Language selection support
+- Simple CLI interface
+
+## Installation
+
+1. Ensure you have Python 3.8+ and ffmpeg installed:
+
+```bash
+# macOS
+brew install ffmpeg
+
+# Ubuntu/Debian
+sudo apt-get install ffmpeg
+
+# Windows: Download from https://ffmpeg.org/download.html
+```
+
+2. Clone this repository and install requirements:
+
+```bash
+git clone https://github.com/yourusername/utube-transcript.git
+cd utube-transcript
+pip install -r requirements.txt
+```
+
+## Usage
+
+Basic usage with OpenAI Whisper API (recommended):
+
+```bash
+# Set your OpenAI API key
+export OPENAI_API_KEY=your-api-key-here
+
+# Generate transcript
+python -m utube_transcript.cli --url "https://www.youtube.com/watch?v=VIDEOID" --output transcript.txt
+```
+
+Advanced options:
+
+```bash
+# Use local Whisper model (requires faster-whisper)
+python -m utube_transcript.cli --url "URL" --backend local --format srt
+
+# Specify language and output JSON format
+python -m utube_transcript.cli --url "URL" --language en --format json --output transcript.json
+
+# Use OpenAI API key directly
+python -m utube_transcript.cli --url "URL" --api-key "your-key-here"
+```
+
+### Command Line Options
+
+- `--url`: YouTube video URL (required)
+- `--output, -o`: Output file path (default: transcript.<format>)
+- `--backend`: Transcription backend: 'openai' or 'local' (default: openai)
+- `--format, -f`: Output format: 'txt', 'srt', or 'json' (default: txt)
+- `--language, -l`: Language code, e.g., 'en', 'es' (optional)
+- `--api-key`: OpenAI API key (can also use OPENAI_API_KEY environment variable)
+
+## Notes
+
+- The OpenAI backend requires an API key. Set it via the `OPENAI_API_KEY` environment variable or the `--api-key` option.
+- The local backend uses faster-whisper, which may not be available on all platforms (e.g., M1/M2 Macs).
+- Temporary files are automatically cleaned up after transcription.
+- For long videos, the OpenAI API may have size limits.
+
+## License
+
+MIT License - feel free to use and modify as needed.

@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "utube-transcript"
+version = "0.1.0"
+description = "Generate transcripts from YouTube videos using Whisper"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [{ name = "Your Name", email = "your.email@example.com" }]
+
+[project.urls]
+Homepage = "https://github.com/swaubhik/utube-transcript"
+Repository = "https://github.com/swaubhik/utube-transcript.git"
+
+[project.scripts]
+utube-transcript = "utube_transcript.cli:main"

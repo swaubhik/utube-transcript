@@ -1,0 +1,2 @@
+[console_scripts]
+utube-transcript = utube_transcript.cli:main
