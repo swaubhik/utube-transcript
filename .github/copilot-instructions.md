@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-YouTube transcript generator CLI tool that downloads audio from YouTube videos and transcribes them using multiple Whisper backends (OpenAI API, local faster-whisper, or Ollama).
+YouTube transcript generator CLI tool that downloads audio from YouTube videos and transcribes them using Whisper backends (OpenAI API or local faster-whisper).
 
 **Key Architecture Pattern**: Three-layer separation
 
@@ -14,15 +14,14 @@ YouTube transcript generator CLI tool that downloads audio from YouTube videos a
 
 ### Backend Architecture (`transcriber.py`)
 
-The project supports **three transcription backends** via runtime polymorphism:
+The project supports **two transcription backends** via runtime polymorphism:
 
 1. **`openai`**: Uses OpenAI Whisper API (requires `OPENAI_API_KEY`)
 2. **`local`**: Uses faster-whisper library (GPU-accelerated, not available on M1/M2 Macs)
-3. **`ollama`**: Uses Ollama's llava model for audio transcription (Docker-based)
 
-**Pattern**: Single `Transcriber` class with backend selection in `__init__()`, delegating to `_transcribe_openai()`, `_transcribe_local()`, or `_transcribe_ollama()` based on `self.backend`.
+**Note**: Ollama is **not supported** as Whisper models are not available in Ollama.
 
-**Known Issue in Code**: `transcriber.py` has duplicate `__init__()` method definitions (lines ~20-53) - the second definition shadows the first, effectively disabling the ollama backend initialization code in production.
+**Pattern**: Single `Transcriber` class with backend selection in `__init__()`, delegating to `_transcribe_openai()` or `_transcribe_local()` based on `self.backend`.
 
 ### yt-dlp Integration (`downloader.py`)
 
@@ -56,8 +55,7 @@ Three formats supported: `txt`, `srt`, `json`
 Required variables defined in `.env.example`:
 
 - `OPENAI_API_KEY`: Required for OpenAI backend
-- `OLLAMA_HOST`: Default `http://localhost:11434`
-- `DEFAULT_BACKEND`: Recommended `ollama` (no API key needed)
+- `DEFAULT_BACKEND`: Recommended `openai` (most accurate)
 
 **Pattern**: Use `utils.get_env_var()` which auto-loads `.env` via python-dotenv, never directly access `os.getenv()` for config.
 
@@ -82,7 +80,7 @@ faster-whisper>=0.10.0; platform_system != "Darwin" or platform_machine != "arm6
 1. **CLI mode** (`utube-transcript`): Argument-based, scriptable
 
    ```bash
-   utube-transcript --url URL --backend ollama --format srt -o output.srt
+   utube-transcript --url URL --backend openai --format srt -o output.srt
    ```
 
 2. **Interactive mode** (`utube-transcript-interactive`): Menu-driven prompts
@@ -104,7 +102,7 @@ faster-whisper>=0.10.0; platform_system != "Darwin" or platform_machine != "arm6
 ### Test Organization
 
 - `tests/test_basic.py`: Unit tests for utilities, initialization, error handling
-- `tests/test_ollama.py`: Integration test with real YouTube download
+- `tests/test_ollama.py`: Disabled test file (Ollama backend not supported)
 
 **Pattern**: Integration tests use `tmp_path` fixture for isolated file operations:
 
@@ -119,10 +117,9 @@ def test_ollama_transcription(tmp_path):
 ```bash
 pytest tests/                    # Run all tests
 pytest tests/test_basic.py      # Unit tests only
-pytest -k ollama                # Integration tests (requires Ollama running)
 ```
 
-**Note**: `test_ollama.py` requires Ollama service running on `localhost:11434`. Tests will fail if not available.
+**Note**: Integration tests may require internet connectivity for YouTube downloads.
 
 ## Common Development Workflows
 
@@ -146,19 +143,9 @@ Enable verbose output by modifying yt-dlp options:
 'no_warnings': False,
 ```
 
-Check Ollama availability:
-
-```python
-from utube_transcript.ollama_client import OllamaClient
-client = OllamaClient()
-available, error = client.check_availability()
-```
-
 ## Project-Specific Conventions
 
-1. **Audio format standardization**: Always convert to 16kHz mono WAV for Ollama backend (see `ollama_client.py` ffmpeg command)
-
-2. **Error message format**: User-facing errors should be actionable:
+1. **Error message format**: User-facing errors should be actionable:
 
    ```python
    raise RuntimeError(
@@ -167,18 +154,16 @@ available, error = client.check_availability()
    )
    ```
 
-3. **Timestamp format**: Use SRT-standard `HH:MM:SS.mmm` via `_format_timestamp()` - never roll your own time formatting
+2. **Timestamp format**: Use SRT-standard `HH:MM:SS.mmm` via `_format_timestamp()` - never roll your own time formatting
 
-4. **Temp file handling**: Use `tempfile.gettempdir()` for audio downloads, never hardcode `/tmp` (Windows compatibility)
+3. **Temp file handling**: Use `tempfile.gettempdir()` for audio downloads, never hardcode `/tmp` (Windows compatibility)
 
-5. **Import organization**: All internal imports use relative imports (`.utils`, `.downloader`, etc.)
+4. **Import organization**: All internal imports use relative imports (`.utils`, `.downloader`, etc.)
 
 ## Known Issues & TODOs
 
-1. **Duplicate `__init__` in `transcriber.py`** (lines ~20-53): Second definition shadows first, breaking ollama backend initialization
-2. **OpenAI SRT support incomplete**: `_transcribe_openai()` comment says "TODO: Implement proper SRT formatting"
-3. **Ollama transcription quality**: Currently uses llava model as workaround - proper whisper model integration pending
-4. **Interactive mode .env updates**: Modifies `.env` file in-place when saving API key - assumes specific format
+1. **OpenAI SRT support incomplete**: `_transcribe_openai()` comment says "TODO: Implement proper SRT formatting"
+2. **Interactive mode .env updates**: Modifies `.env` file in-place when saving API key - assumes specific format
 
 ## Installation & Setup
 
@@ -200,7 +185,7 @@ pip install -e .
 ## Key Files Reference
 
 - `src/utube_transcript/cli.py` - Main CLI entrypoint and argument parsing
-- `src/utube_transcript/transcriber.py` - Core transcription logic (contains the duplicate `__init__` bug)
+- `src/utube_transcript/transcriber.py` - Core transcription logic with backend selection
 - `src/utube_transcript/downloader.py` - YouTube audio extraction with SABR workaround
-- `src/utube_transcript/ollama_client.py` - Ollama API integration
+- `src/utube_transcript/ollama_client.py` - Ollama client (currently unused - Whisper not available in Ollama)
 - `pyproject.toml` - Package metadata, defines both CLI entry points

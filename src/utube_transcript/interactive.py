@@ -27,16 +27,13 @@ def prompt_for_input():
     
     # Get transcription backend
     print("\nAvailable transcription backends:")
-    print("1. OpenAI Whisper API (requires API key)")
-    print("2. Local Whisper model (uses GPU)")
-    print("3. Ollama Whisper (using Docker)")
-    backend_choice = input("Choose backend [1-3] (default: 3): ").strip()
-    if backend_choice == "1":
-        backend = "openai"
-    elif backend_choice == "2":
+    print("1. OpenAI Whisper API (requires API key, most accurate)")
+    print("2. Local Whisper model (uses GPU, not available on M1/M2 Macs)")
+    backend_choice = input("Choose backend [1-2] (default: 1): ").strip()
+    if backend_choice == "2":
         backend = "local"
     else:
-        backend = "ollama"
+        backend = "openai"
     
     # Get language (optional)
     language = input("\nEnter language code (e.g., 'en' for English, leave empty for auto-detect): ").strip()

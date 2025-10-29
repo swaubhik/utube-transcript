@@ -10,18 +10,16 @@ class Transcriber:
     
     def __init__(
         self,
-        backend: Literal["openai", "local", "ollama"] = "openai",
+        backend: Literal["openai", "local"] = "openai",
         api_key: Optional[str] = None,
-        language: Optional[str] = None,
-        ollama_host: Optional[str] = None
+        language: Optional[str] = None
     ):
         """Initialize the transcriber.
         
         Args:
-            backend: Transcription backend to use ('openai', 'local', or 'ollama')
+            backend: Transcription backend to use ('openai' or 'local')
             api_key: OpenAI API key (required for 'openai' backend)
             language: Optional language code (e.g., 'en', 'es')
-            ollama_host: Ollama API host URL (default: http://localhost:11434)
         """
         self.backend = backend
         self.language = language
@@ -46,14 +44,11 @@ class Transcriber:
                     "faster-whisper not installed. Install it with: "
                     "pip install faster-whisper"
                 )
-                
-        elif backend == "ollama":
-            from .ollama_client import OllamaClient
-            self.ollama = OllamaClient(host=ollama_host or "http://localhost:11434")
-            # Check if Ollama is available
-            available, error = self.ollama.check_availability()
-            if not available:
-                raise RuntimeError(f"Ollama not available: {error}")
+        else:
+            raise ValueError(
+                f"Unsupported backend: {backend}. "
+                "Available backends: 'openai', 'local'"
+            )
     
     def transcribe(
         self,
@@ -77,7 +72,7 @@ class Transcriber:
         elif self.backend == "local":
             return self._transcribe_local(audio_path, output_format)
         else:
-            return self._transcribe_ollama(audio_path, output_format)
+            raise ValueError(f"Unsupported backend: {self.backend}")
     
     def _transcribe_openai(
         self,
@@ -133,38 +128,6 @@ class Transcriber:
                 f"{self._format_timestamp(segment.start)} --> "
                 f"{self._format_timestamp(segment.end)}",
                 segment.text.strip(),
-                ""
-            ])
-        return "\n".join(srt_lines)
-    
-    def _transcribe_ollama(
-        self,
-        audio_path: str,
-        output_format: str
-    ) -> Union[str, dict]:
-        """Transcribe using Ollama's Whisper model."""
-        segments = self.ollama.transcribe(
-            audio_path,
-            language=self.language
-        )
-        
-        if output_format == "json":
-            return {"segments": segments}
-        
-        # Simple text output
-        text = " ".join(segment["text"] for segment in segments)
-        
-        if output_format == "txt":
-            return text
-            
-        # Basic SRT format
-        srt_lines = []
-        for i, segment in enumerate(segments, 1):
-            srt_lines.extend([
-                str(i),
-                f"{self._format_timestamp(segment['start'])} --> "
-                f"{self._format_timestamp(segment['end'])}",
-                segment["text"].strip(),
                 ""
             ])
         return "\n".join(srt_lines)

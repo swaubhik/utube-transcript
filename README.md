@@ -10,6 +10,8 @@ A Python CLI tool to generate transcripts from YouTube videos using either OpenA
 - Language selection support
 - Simple CLI interface
 
+**Note**: This tool does not support Ollama as Whisper models are not available in Ollama.
+
 ## Installation
 
 1. Ensure you have Python 3.8+ and ffmpeg installed:
