@@ -54,35 +54,6 @@ class Transcriber:
             available, error = self.ollama.check_availability()
             if not available:
                 raise RuntimeError(f"Ollama not available: {error}")
-        """Initialize the transcriber.
-        
-        Args:
-            backend: Transcription backend to use ('openai' or 'local')
-            api_key: OpenAI API key (required for 'openai' backend)
-            language: Optional language code (e.g., 'en', 'es')
-        """
-        self.backend = backend
-        self.language = language
-        
-        if backend == "openai":
-            # Try to get API key from env if not provided
-            self.api_key = api_key or get_env_var("OPENAI_API_KEY")
-            if not self.api_key:
-                raise ValueError(
-                    "OpenAI API key required. Set OPENAI_API_KEY env variable "
-                    "or pass api_key parameter."
-                )
-            openai.api_key = self.api_key
-            
-        elif backend == "local":
-            try:
-                import faster_whisper
-                self.model = faster_whisper.WhisperModel("base")
-            except ImportError:
-                raise ImportError(
-                    "faster-whisper not installed. Install it with: "
-                    "pip install faster-whisper"
-                )
     
     def transcribe(
         self,

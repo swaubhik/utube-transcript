@@ -38,3 +38,4 @@ ENV/
 *.m4a
 transcript.*
 .env
+transcripts/
