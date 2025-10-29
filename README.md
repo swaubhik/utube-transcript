@@ -9,10 +9,33 @@ A Python CLI tool to generate transcripts from YouTube videos using either OpenA
 - Multiple output formats: TXT, SRT (with timestamps), or JSON
 - Language selection support
 - Simple CLI interface
+- Docker support for easy deployment
 
 **Note**: This tool does not support Ollama as Whisper models are not available in Ollama.
 
-## Installation
+## Quick Start with Docker 🐳
+
+The easiest way to use this tool is with Docker:
+
+```bash
+# 1. Create output directory and set up environment
+mkdir -p output
+cp .env.example .env
+# Edit .env and add your OPENAI_API_KEY
+
+# 2. Run interactively
+docker-compose --profile cpu up utube-transcript-cpu
+
+# OR use CLI mode
+docker-compose run --rm utube-transcript-cli \
+  --url "https://www.youtube.com/watch?v=VIDEO_ID" \
+  --format srt \
+  -o transcript.srt
+```
+
+See [DOCKER.md](DOCKER.md) for complete Docker documentation.
+
+## Installation (Local)
 
 1. Ensure you have Python 3.8+ and ffmpeg installed:
 

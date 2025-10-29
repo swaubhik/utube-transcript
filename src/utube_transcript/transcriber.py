@@ -38,7 +38,17 @@ class Transcriber:
         elif backend == "local":
             try:
                 import faster_whisper
-                self.model = faster_whisper.WhisperModel("base", device="cuda")
+                import torch
+        
+                # Auto-detect GPU availability
+                device = "cuda" if torch.cuda.is_available() else "cpu"
+                compute_type = "float16" if device == "cuda" else "int8"
+
+                self.model = faster_whisper.WhisperModel(
+                    "base",
+                    device=device,
+                    compute_type=compute_type
+                )
             except ImportError:
                 raise ImportError(
                     "faster-whisper not installed. Install it with: "

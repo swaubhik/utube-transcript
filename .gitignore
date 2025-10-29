@@ -39,3 +39,10 @@ ENV/
 transcript.*
 .env
 transcripts/
+output/*.txt
+output/*.srt
+output/*.json
+output/*.mp3
+output/*.wav
+output/*.m4a
+!output/.gitkeep

@@ -167,6 +167,8 @@ Enable verbose output by modifying yt-dlp options:
 
 ## Installation & Setup
 
+### Local Development
+
 ```bash
 # Install with optional local backend (skip on M1/M2 Macs)
 pip install -r requirements.txt
@@ -181,6 +183,31 @@ ffmpeg -version
 # Install in editable mode for development
 pip install -e .
 ```
+
+### Docker Deployment
+
+```bash
+# Create output directory
+mkdir -p output
+
+# Build images
+docker-compose build utube-transcript-cpu  # CPU variant
+docker-compose build utube-transcript-gpu  # GPU variant (requires nvidia-docker)
+
+# Run interactively
+docker-compose --profile cpu up utube-transcript-cpu
+
+# Run CLI mode
+docker-compose run --rm utube-transcript-cli \
+  --url "URL" --format srt -o transcript.srt
+```
+
+**Docker Architecture:**
+
+- **CPU image**: Based on `python:3.11-slim`, uses OpenAI API backend
+- **GPU image**: Based on `pytorch/pytorch:2.9.0-cuda12.8-cudnn9-runtime`, uses local Whisper with CUDA
+- Multi-stage build separates CPU and GPU variants
+- Volume mount to `./output` for transcript files
 
 ## Key Files Reference
 

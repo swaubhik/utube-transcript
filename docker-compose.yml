@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  # CPU-only service (default, works on all systems)
+  utube-transcript-cpu:
+    build:
+      context: .
+      target: cpu
+    container_name: utube-transcript-cpu
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DEFAULT_BACKEND=openai
+      - DEFAULT_OUTPUT_FORMAT=txt
+      - DEFAULT_LANGUAGE=en
+    volumes:
+      # Mount output directory for transcripts
+      - ./output:/app/output
+      # Mount .env file for API keys
+      - ./.env:/app/.env:ro
+    working_dir: /app
+    stdin_open: true
+    tty: true
+    profiles: ["cpu"]
+
+  # GPU-enabled service (requires NVIDIA GPU and nvidia-docker)
+  utube-transcript-gpu:
+    build:
+      context: .
+      target: gpu
+    container_name: utube-transcript-gpu
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DEFAULT_BACKEND=local
+      - DEFAULT_OUTPUT_FORMAT=txt
+      - DEFAULT_LANGUAGE=en
+    volumes:
+      # Mount output directory for transcripts
+      - ./output:/app/output
+      # Mount .env file for API keys
+      - ./.env:/app/.env:ro
+    working_dir: /app
+    stdin_open: true
+    tty: true
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    profiles: ["gpu"]
+
+  # CLI service for non-interactive usage
+  utube-transcript-cli:
+    build:
+      context: .
+      target: cpu
+    container_name: utube-transcript-cli
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - ./output:/app/output
+      - ./.env:/app/.env:ro
+    working_dir: /app/output
+    # Override entrypoint to use CLI mode
+    entrypoint: ["utube-transcript"]
+    # Pass arguments via command
+    # Example: docker-compose run utube-transcript-cli --url "https://youtube.com/..." --format srt
+    profiles: ["cli"]
