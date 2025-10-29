@@ -1,2 +1,3 @@
 [console_scripts]
 utube-transcript = utube_transcript.cli:main
+utube-transcript-interactive = utube_transcript.interactive:main

@@ -37,7 +37,17 @@ class YouTubeDownloader:
             }],
             'outtmpl': os.path.join(self.output_dir, '%(id)s.%(ext)s'),
             'quiet': True,
-        }
+            'no_warnings': True,
+            'extract_flat': False,
+            'ignoreerrors': True,
+            # Add options to handle SABR streaming
+            'extractor_args': {
+                'youtube': {
+                    'player_client': ['android'],  # Use android client to avoid SABR issues
+                    'player_skip': ['webpage', 'configs']  # Skip problematic clients
+                }
+            }
+            }
         
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -50,10 +60,20 @@ class YouTubeDownloader:
                 
                 # Download if file doesn't exist
                 if not os.path.exists(output_path):
-                    ydl.download([url])
+                    result = ydl.download([url])
+                    if result != 0:
+                        raise RuntimeError("Download failed")
+                    
+                    # Verify the file exists after download
+                    if not os.path.exists(output_path):
+                        raise RuntimeError("Download completed but file not found")
                 
                 return output_path
                 
+        except yt_dlp.utils.DownloadError as e:
+            if "This video is unavailable" in str(e):
+                raise RuntimeError("Video is unavailable. It might be private or deleted.") from e
+            raise RuntimeError(f"Failed to download audio: {str(e)}") from e
         except Exception as e:
             raise RuntimeError(f"Failed to download audio: {str(e)}") from e
             

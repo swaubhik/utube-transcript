@@ -8,45 +8,47 @@ from .downloader import YouTubeDownloader
 from .transcriber import Transcriber
 from .utils import check_ffmpeg_installed
 
-def main():
+def main(args=None):
     """Main CLI entrypoint."""
-    parser = argparse.ArgumentParser(
-        description="Generate transcripts from YouTube videos"
-    )
-    parser.add_argument(
-        "--url",
-        required=True,
-        help="YouTube video URL"
-    )
-    parser.add_argument(
-        "--output",
-        "-o",
-        help="Output file path (default: transcript.<format>)"
-    )
-    parser.add_argument(
-        "--backend",
-        choices=["openai", "local"],
-        default="openai",
-        help="Transcription backend to use (default: openai)"
-    )
-    parser.add_argument(
-        "--format",
-        "-f",
-        choices=["txt", "srt", "json"],
-        default="txt",
-        help="Output format (default: txt)"
-    )
-    parser.add_argument(
-        "--language",
-        "-l",
-        help="Language code (e.g., en, es) - optional"
-    )
-    parser.add_argument(
-        "--api-key",
-        help="OpenAI API key (can also use OPENAI_API_KEY env var)"
-    )
-    
-    args = parser.parse_args()
+    if args is None:
+        parser = argparse.ArgumentParser(
+            description="Generate transcripts from YouTube videos"
+        )
+        parser.add_argument(
+            "--url",
+            required=True,
+            help="YouTube video URL"
+        )
+        parser.add_argument(
+            "--output",
+            "-o",
+            help="Output file path (default: transcript.<format>)"
+        )
+        parser.add_argument(
+            "--backend",
+            choices=["openai", "local"],
+            default="openai",
+            help="Transcription backend to use (default: openai)"
+        )
+        parser.add_argument(
+            "--format",
+            "-f",
+            choices=["txt", "srt", "json"],
+            default="txt",
+            help="Output format (default: txt)"
+        )
+        parser.add_argument(
+            "--language",
+            "-l",
+            help="Language code (e.g., en, es) - optional"
+        )
+        parser.add_argument(
+            "--api-key",
+            help="OpenAI API key (can also use OPENAI_API_KEY env var)",
+            default=None
+        )
+        
+        args = parser.parse_args()
     
     try:
         # Ensure ffmpeg is available

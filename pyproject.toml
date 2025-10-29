@@ -17,3 +17,4 @@ Repository = "https://github.com/swaubhik/utube-transcript.git"
 
 [project.scripts]
 utube-transcript = "utube_transcript.cli:main"
+utube-transcript-interactive = "utube_transcript.interactive:main"

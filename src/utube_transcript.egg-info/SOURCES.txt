@@ -4,6 +4,8 @@ pyproject.toml
 src/utube_transcript/__init__.py
 src/utube_transcript/cli.py
 src/utube_transcript/downloader.py
+src/utube_transcript/interactive.py
+src/utube_transcript/ollama_client.py
 src/utube_transcript/transcriber.py
 src/utube_transcript/utils.py
 src/utube_transcript.egg-info/PKG-INFO
@@ -12,3 +14,4 @@ src/utube_transcript.egg-info/dependency_links.txt
 src/utube_transcript.egg-info/entry_points.txt
 src/utube_transcript.egg-info/top_level.txt
 tests/test_basic.py
+tests/test_ollama.py
